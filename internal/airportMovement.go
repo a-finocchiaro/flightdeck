@@ -7,7 +7,6 @@ import (
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/client"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/common"
 	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 )
 
 // TODO: remove this
@@ -24,7 +23,7 @@ func DummyRequester(s string) ([]byte, error) {
 var AirportMovementPageTitle string = "AirportMovementsPage"
 
 type AirportMovementPage struct {
-	Grid            *tview.Grid
+	Grid            *GridLayout
 	airport         string
 	arrivalTable    *widgets.AirportMovementTable
 	departuresTable *widgets.AirportMovementTable
@@ -35,12 +34,17 @@ type AirportMovementPage struct {
 	Modal           *AirportMovementModal
 }
 
+var airportMovementGridOpts GridOptions = GridOptions{
+	RowCount:   1,
+	ColCount:   3,
+	HeaderSize: 10,
+}
+
 // Constructs the new airport movement page
 func NewAirportMovementPage(router *Router) *AirportMovementPage {
 	p := AirportMovementPage{
 		title:           AirportMovementPageTitle,
 		router:          router,
-		Grid:            tview.NewGrid(),
 		arrivalTable:    widgets.NewAirportArrivalsTable(),
 		departuresTable: widgets.NewAirportDeparturesTable(),
 		flightData:      widgets.NewFlightTree(router.App),
@@ -48,7 +52,8 @@ func NewAirportMovementPage(router *Router) *AirportMovementPage {
 		Modal:           NewAirportMovementModal(),
 	}
 
-	p.buildGrid()
+	p.Grid = NewGridLayout(airportMovementGridOpts)
+	p.Grid.AddHeader(p.airportInfo.Primitive(), false)
 
 	p.arrivalTable.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyTAB {
@@ -62,9 +67,9 @@ func NewAirportMovementPage(router *Router) *AirportMovementPage {
 		}
 	})
 
-	p.Grid.AddItem(p.arrivalTable, 1, 0, 1, 1, 0, 100, true).
-		AddItem(p.departuresTable, 1, 1, 1, 1, 0, 100, false).
-		AddItem(p.flightData.Primitive(), 1, 2, 1, 1, 0, 100, false)
+	p.Grid.AddPanel(p.arrivalTable, 1, 0, true)
+	p.Grid.AddPanel(p.departuresTable, 1, 1, true)
+	p.Grid.AddPanel(p.flightData.Primitive(), 1, 2, true)
 
 	// set the modal actions
 	p.setModalCallback()
@@ -105,15 +110,6 @@ func (p *AirportMovementPage) Update(code string) {
 		p.flightData.Update(airportData.Schedule.Departures.Data[row-1], p.departuresTable.Table)
 		p.router.App.SetFocus(p.flightData.Primitive())
 	})
-}
-
-// sets up the base grid
-func (p *AirportMovementPage) buildGrid() {
-	p.Grid = tview.NewGrid().
-		SetRows(10, 0).
-		SetColumns(0, 0, 0).
-		SetBorders(false).
-		AddItem(p.airportInfo.Primitive(), 0, 0, 1, 3, 0, 0, false)
 }
 
 // sets up the FormModal object to allow input to select an airport
