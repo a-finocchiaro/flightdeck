@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -29,9 +31,6 @@ func Init() {
 	// add the pages
 	r.Primitives.AirportMovements = NewAirportMovementPage(r)
 
-	// add the modal
-	r.AddPage("modal", r.Primitives.AirportMovements.Modal().Modal, true, true)
-
 	// bind the keys
 	r.bindKeys()
 
@@ -49,9 +48,20 @@ func (r *Router) AddPage(title string, primitive tview.Primitive, resize bool, v
 // Sets up the application keybindings
 func (r *Router) bindKeys() {
 	r.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyF1 {
-			r.Pages.ShowPage("modal")
-			r.Pages.SendToFront("modal")
+		switch event.Key() {
+
+		// Pressing F1 opens the Airport select modal
+		case tcell.KeyF1:
+			r.Pages.ShowPage(r.Primitives.AirportMovements.Modal.Title)
+			r.Pages.SendToFront(r.Primitives.AirportMovements.Modal.Title)
+
+		// escape should always close a modal if one is open
+		case tcell.KeyEsc:
+			name, _ := r.Pages.GetFrontPage()
+
+			if strings.Contains(name, "Modal") {
+				r.Pages.HidePage(name)
+			}
 		}
 
 		return event

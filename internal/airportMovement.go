@@ -32,11 +32,12 @@ type AirportMovementPage struct {
 	airportInfo     *widgets.AirportInfo
 	router          *Router
 	title           string
+	Modal           *AirportMovementModal
 }
 
 // Constructs the new airport movement page
 func NewAirportMovementPage(router *Router) *AirportMovementPage {
-	page := AirportMovementPage{
+	p := AirportMovementPage{
 		title:           AirportMovementPageTitle,
 		router:          router,
 		Grid:            tview.NewGrid(),
@@ -44,29 +45,34 @@ func NewAirportMovementPage(router *Router) *AirportMovementPage {
 		departuresTable: widgets.NewAirportDeparturesTable(),
 		flightData:      widgets.NewFlightTree(router.App),
 		airportInfo:     widgets.NewAirportInfo(),
+		Modal:           NewAirportMovementModal(),
 	}
 
-	page.buildGrid()
+	p.buildGrid()
 
-	page.arrivalTable.SetDoneFunc(func(key tcell.Key) {
+	p.arrivalTable.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyTAB {
-			router.App.SetFocus(page.departuresTable)
+			router.App.SetFocus(p.departuresTable)
 		}
 	})
 
-	page.departuresTable.SetDoneFunc(func(key tcell.Key) {
+	p.departuresTable.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyTAB {
-			router.App.SetFocus(page.arrivalTable)
+			router.App.SetFocus(p.arrivalTable)
 		}
 	})
 
-	page.Grid.AddItem(page.arrivalTable, 1, 0, 1, 1, 0, 100, true).
-		AddItem(page.departuresTable, 1, 1, 1, 1, 0, 100, false).
-		AddItem(page.flightData.Primitive(), 1, 2, 1, 1, 0, 100, false)
+	p.Grid.AddItem(p.arrivalTable, 1, 0, 1, 1, 0, 100, true).
+		AddItem(p.departuresTable, 1, 1, 1, 1, 0, 100, false).
+		AddItem(p.flightData.Primitive(), 1, 2, 1, 1, 0, 100, false)
 
-	router.AddPage(page.title, page.Grid, true, false)
+	// set the modal actions
+	p.setModalCallback()
 
-	return &page
+	router.AddPage(p.Modal.Title, p.Modal.Primitive(), true, true)
+	router.AddPage(p.title, p.Grid, true, false)
+
+	return &p
 }
 
 // fetch updated data and set it in the tables
@@ -111,18 +117,14 @@ func (p *AirportMovementPage) buildGrid() {
 }
 
 // sets up the FormModal object to allow input to select an airport
-func (p *AirportMovementPage) Modal() *widgets.FormModal {
-	modal := widgets.NewFormModal("Airport Select")
-
-	modal.SetActionFunc(func(buttonIndex int, buttonLabel string) {
+func (p *AirportMovementPage) setModalCallback() {
+	p.Modal.SetActionFunc(func(buttonIndex int, buttonLabel string) {
 		if buttonIndex == 1 {
-			airportCode := modal.GetInputDataForField("Airport IATA:")
+			airportCode := p.Modal.GetInputDataForField("Airport IATA:")
 			p.Update(airportCode)
 			p.router.Pages.ShowPage(p.title)
-			p.router.Pages.HidePage("modal")
+			p.router.Pages.HidePage(p.Modal.Title)
 		}
-		p.router.Pages.HidePage("modal")
+		p.router.Pages.HidePage(p.Modal.Title)
 	})
-
-	return modal
 }

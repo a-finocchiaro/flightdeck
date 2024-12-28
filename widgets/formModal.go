@@ -11,7 +11,15 @@ type FormModal struct {
 	ActionFunc func(int, string)
 }
 
-func NewFormModal(text string) *FormModal {
+type InputFields struct {
+	Label       string
+	Placeholder string
+	Length      int
+	Accept      func(string, rune) bool
+	OnChange    func(string)
+}
+
+func NewFormModal(buttons []string, inputFields []InputFields) *FormModal {
 	m := FormModal{}
 	modal := func(p tview.Primitive, width int, height int) tview.Primitive {
 		return tview.NewGrid().
@@ -23,12 +31,21 @@ func NewFormModal(text string) *FormModal {
 	m.Form = tview.NewForm().
 		SetButtonsAlign(tview.AlignCenter).
 		SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
-		SetButtonTextColor(tview.Styles.PrimaryTextColor).
-		AddInputField("Airport IATA:", "", 5, nil, nil)
+		SetButtonTextColor(tview.Styles.PrimaryTextColor)
+
+	for _, field := range inputFields {
+		m.Form.AddInputField(
+			field.Label,
+			field.Placeholder,
+			field.Length,
+			field.Accept,
+			field.OnChange,
+		)
+	}
 
 	m.Form.SetBorder(true).SetTitle("Select Airport")
+	m.AddButtons(buttons)
 
-	m.AddButtons([]string{"Cancel", "Search"})
 	m.Modal = modal(m.Form, 40, 10)
 
 	return &m
@@ -65,4 +82,8 @@ func (m *FormModal) AddButtons(labels []string) *FormModal {
 
 func (m *FormModal) GetInputDataForField(fieldLabel string) string {
 	return m.Form.GetFormItemByLabel(fieldLabel).(*tview.InputField).GetText()
+}
+
+func (m *FormModal) Primitive() tview.Primitive {
+	return m.Modal
 }
