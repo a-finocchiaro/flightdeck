@@ -1,12 +1,11 @@
-package fr24pages
+package internal
 
 import (
 	"os"
 
-	"github.com/a-finocchiaro/fr24cli/widgets"
+	"github.com/a-finocchiaro/flightdeck/widgets"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/client"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/common"
-	"github.com/a-finocchiaro/go-flightradar24-sdk/webrequest"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -22,6 +21,8 @@ func DummyRequester(s string) ([]byte, error) {
 	return data, nil
 }
 
+var AirportMovementPageTitle string = "AirportMovementsPage"
+
 type AirportMovementPage struct {
 	Grid            *tview.Grid
 	airport         string
@@ -29,33 +30,33 @@ type AirportMovementPage struct {
 	departuresTable *widgets.AirportMovementTable
 	flightData      *widgets.FlightTree
 	airportInfo     *widgets.AirportInfo
-	app             *tview.Application
+	router          *Router
+	title           string
 }
 
 // Constructs the new airport movement page
-func NewAirportMovementPage(code string, app *tview.Application) *AirportMovementPage {
+func NewAirportMovementPage(router *Router) *AirportMovementPage {
 	page := AirportMovementPage{
-		app:             app,
+		title:           AirportMovementPageTitle,
+		router:          router,
 		Grid:            tview.NewGrid(),
-		airport:         code,
 		arrivalTable:    widgets.NewAirportArrivalsTable(),
 		departuresTable: widgets.NewAirportDeparturesTable(),
-		flightData:      widgets.NewFlightTree(),
+		flightData:      widgets.NewFlightTree(router.App),
 		airportInfo:     widgets.NewAirportInfo(),
 	}
 
 	page.buildGrid()
-	page.Update()
 
 	page.arrivalTable.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyTAB {
-			app.SetFocus(page.departuresTable)
+			router.App.SetFocus(page.departuresTable)
 		}
 	})
 
 	page.departuresTable.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyTAB {
-			app.SetFocus(page.arrivalTable)
+			router.App.SetFocus(page.arrivalTable)
 		}
 	})
 
@@ -63,13 +64,18 @@ func NewAirportMovementPage(code string, app *tview.Application) *AirportMovemen
 		AddItem(page.departuresTable, 1, 1, 1, 1, 0, 100, false).
 		AddItem(page.flightData.Primitive(), 1, 2, 1, 1, 0, 100, false)
 
+	router.AddPage(page.title, page.Grid, true, false)
+
 	return &page
 }
 
 // fetch updated data and set it in the tables
-func (p *AirportMovementPage) Update() {
-	// var requester common.Requester = DummyRequester
-	var requester common.Requester = webrequest.SendRequest
+func (p *AirportMovementPage) Update(code string) {
+	var requester common.Requester = DummyRequester
+	// var requester common.Requester = webrequest.SendRequest
+
+	// update the code
+	p.airport = code
 
 	airportData, err := client.GetAirportDetails(requester, p.airport, []string{"details"})
 
@@ -85,13 +91,13 @@ func (p *AirportMovementPage) Update() {
 	p.departuresTable.SetData(airportData.Schedule.Departures.Data)
 
 	p.arrivalTable.SetSelectedFunc(func(row int, col int) {
-		p.flightData.Update(airportData.Schedule.Arrivals.Data[row-1], p.arrivalTable.Table, p.app)
-		p.app.SetFocus(p.flightData.Primitive())
+		p.flightData.Update(airportData.Schedule.Arrivals.Data[row-1], p.arrivalTable.Table)
+		p.router.App.SetFocus(p.flightData.Primitive())
 	})
 
 	p.departuresTable.SetSelectedFunc(func(row int, col int) {
-		p.flightData.Update(airportData.Schedule.Departures.Data[row-1], p.departuresTable.Table, p.app)
-		p.app.SetFocus(p.flightData.Primitive())
+		p.flightData.Update(airportData.Schedule.Departures.Data[row-1], p.departuresTable.Table)
+		p.router.App.SetFocus(p.flightData.Primitive())
 	})
 }
 
@@ -102,4 +108,21 @@ func (p *AirportMovementPage) buildGrid() {
 		SetColumns(0, 0, 0).
 		SetBorders(false).
 		AddItem(p.airportInfo.Primitive(), 0, 0, 1, 3, 0, 0, false)
+}
+
+// sets up the FormModal object to allow input to select an airport
+func (p *AirportMovementPage) Modal() *widgets.FormModal {
+	modal := widgets.NewFormModal("Airport Select")
+
+	modal.SetActionFunc(func(buttonIndex int, buttonLabel string) {
+		if buttonIndex == 1 {
+			airportCode := modal.GetInputDataForField("Airport IATA:")
+			p.Update(airportCode)
+			p.router.Pages.ShowPage(p.title)
+			p.router.Pages.HidePage("modal")
+		}
+		p.router.Pages.HidePage("modal")
+	})
+
+	return modal
 }

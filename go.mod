@@ -1,4 +1,4 @@
-module github.com/a-finocchiaro/fr24cli
+module github.com/a-finocchiaro/flightdeck
 
 go 1.22.10
 

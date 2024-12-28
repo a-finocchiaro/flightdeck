@@ -5,14 +5,14 @@ import (
 	"github.com/rivo/tview"
 )
 
-type Fr24Modal struct {
+type FormModal struct {
 	Modal      tview.Primitive
 	Form       *tview.Form
 	ActionFunc func(int, string)
 }
 
-func NewFr24Modal(text string) *Fr24Modal {
-	m := Fr24Modal{}
+func NewFormModal(text string) *FormModal {
+	m := FormModal{}
 	modal := func(p tview.Primitive, width int, height int) tview.Primitive {
 		return tview.NewGrid().
 			SetColumns(0, width, 0).
@@ -34,13 +34,13 @@ func NewFr24Modal(text string) *Fr24Modal {
 	return &m
 }
 
-func (m *Fr24Modal) SetActionFunc(fn func(int, string)) *Fr24Modal {
+func (m *FormModal) SetActionFunc(fn func(int, string)) *FormModal {
 	m.ActionFunc = fn
 	return m
 }
 
-// Adds buttons to the ModalForm
-func (m *Fr24Modal) AddButtons(labels []string) *Fr24Modal {
+// Adds buttons to the FormModal and sets callbacks for their actions
+func (m *FormModal) AddButtons(labels []string) *FormModal {
 	for index, label := range labels {
 		func(i int, l string) {
 			m.Form.AddButton(label, func() {
@@ -61,4 +61,8 @@ func (m *Fr24Modal) AddButtons(labels []string) *Fr24Modal {
 		}(index, label)
 	}
 	return m
+}
+
+func (m *FormModal) GetInputDataForField(fieldLabel string) string {
+	return m.Form.GetFormItemByLabel(fieldLabel).(*tview.InputField).GetText()
 }

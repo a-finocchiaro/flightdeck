@@ -16,22 +16,22 @@ func baseTreeNode(data string) *tview.TreeNode {
 	return tview.NewTreeNode(data).SetColor(tcell.ColorWhite)
 }
 
-// tree style
-
 type FlightTree struct {
 	tree *tview.TreeView
+	app  *tview.Application
 }
 
-func NewFlightTree() *FlightTree {
+func NewFlightTree(app *tview.Application) *FlightTree {
 	fv := FlightTree{
 		tree: tview.NewTreeView(),
+		app:  app,
 	}
 
 	return &fv
 }
 
 // Updates the flight view with new data
-func (f *FlightTree) Update(data airports.FlightArrivalDepartureData, caller tview.Primitive, app *tview.Application) {
+func (f *FlightTree) Update(data airports.FlightArrivalDepartureData, caller tview.Primitive) {
 	// set the airport data since this is stored either under arrival or departure
 	var airportData airports.FlightAiportData
 	var direction string
@@ -52,10 +52,10 @@ func (f *FlightTree) Update(data airports.FlightArrivalDepartureData, caller tvi
 	aircraftNode := baseTreeNode("Aircraft")
 	statusNode := baseTreeNode("Status")
 
+	baseNode.AddChild(statusNode)
 	baseNode.AddChild(airportNode)
 	baseNode.AddChild(airlineNode)
 	baseNode.AddChild(aircraftNode)
-	baseNode.AddChild(statusNode)
 
 	// Set the Airport info for the origin or destination
 	airportNode.AddChild(baseTreeNode(airportData.Name))
@@ -68,7 +68,7 @@ func (f *FlightTree) Update(data airports.FlightArrivalDepartureData, caller tvi
 	aircraftNode.AddChild(baseTreeNode(data.Flight.Aircraft.Model.Code))
 	aircraftNode.AddChild(baseTreeNode(data.Flight.Aircraft.Registration))
 
-	// update the status indicator
+	// set the status indicator
 	var statusColor tcell.Color
 
 	switch data.Flight.Status.Icon {
@@ -87,7 +87,7 @@ func (f *FlightTree) Update(data airports.FlightArrivalDepartureData, caller tvi
 	// set the escape
 	f.tree.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEsc {
-			app.SetFocus(caller)
+			f.app.SetFocus(caller)
 		}
 	})
 }
