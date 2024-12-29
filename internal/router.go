@@ -15,11 +15,20 @@ type Router struct {
 
 type FlightDeckPrimitives struct {
 	AirportMovements *AirportMovementPage
+	HelpModal        *HelpModal
+}
+
+const (
+	KeyHelp tcell.Key = 63
+)
+
+func initKeys() {
+	tcell.KeyNames[KeyHelp] = "?"
 }
 
 // Sets up a new router and starts the application
 func Init() {
-
+	initKeys()
 	pageMgr := FlightDeckPrimitives{}
 
 	r := &Router{
@@ -30,6 +39,7 @@ func Init() {
 
 	// add the pages
 	r.Primitives.AirportMovements = NewAirportMovementPage(r)
+	r.Primitives.HelpModal = NewHelpModal(r)
 
 	// bind the keys
 	r.bindKeys()
@@ -61,6 +71,14 @@ func (r *Router) bindKeys() {
 
 			if strings.Contains(name, "Modal") {
 				r.Pages.HidePage(name)
+			}
+
+		case tcell.KeyRune:
+			key := tcell.Key(event.Rune())
+
+			// Set the help modal
+			if key == KeyHelp {
+				r.Pages.ShowPage(r.Primitives.HelpModal.Title)
 			}
 		}
 

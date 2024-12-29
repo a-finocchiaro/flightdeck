@@ -67,6 +67,8 @@ func NewAirportMovementPage(router *Router) *AirportMovementPage {
 		}
 	})
 
+	p.Grid.SetBackgroundColor(tcell.ColorDefault)
+
 	p.Grid.AddPanel(p.arrivalTable, 1, 0, true)
 	p.Grid.AddPanel(p.departuresTable, 1, 1, true)
 	p.Grid.AddPanel(p.flightData.Primitive(), 1, 2, true)

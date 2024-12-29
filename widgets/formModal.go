@@ -21,13 +21,6 @@ type InputFields struct {
 
 func NewFormModal(buttons []string, inputFields []InputFields) *FormModal {
 	m := FormModal{}
-	modal := func(p tview.Primitive, width int, height int) tview.Primitive {
-		return tview.NewGrid().
-			SetColumns(0, width, 0).
-			SetRows(0, height, 0).
-			AddItem(p, 1, 1, 1, 1, 0, 0, true)
-	}
-
 	m.Form = tview.NewForm().
 		SetButtonsAlign(tview.AlignCenter).
 		SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
@@ -46,7 +39,7 @@ func NewFormModal(buttons []string, inputFields []InputFields) *FormModal {
 	m.Form.SetBorder(true).SetTitle("Select Airport")
 	m.AddButtons(buttons)
 
-	m.Modal = modal(m.Form, 40, 10)
+	m.Modal = NewGridModal(m.Form, 40, 10)
 
 	return &m
 }
