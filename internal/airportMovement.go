@@ -6,6 +6,7 @@ import (
 	"github.com/a-finocchiaro/flightdeck/widgets"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/client"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/common"
+	"github.com/a-finocchiaro/go-flightradar24-sdk/webrequest"
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -84,8 +85,8 @@ func NewAirportMovementPage(router *Router) *AirportMovementPage {
 
 // fetch updated data and set it in the tables
 func (p *AirportMovementPage) Update(code string) {
-	var requester common.Requester = DummyRequester
-	// var requester common.Requester = webrequest.SendRequest
+	// var requester common.Requester = DummyRequester
+	var requester common.Requester = webrequest.SendRequest
 
 	// update the code
 	p.airport = code

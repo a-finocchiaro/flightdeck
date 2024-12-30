@@ -34,7 +34,7 @@ func NewHelpModal(r *Router) *HelpModal {
 		t.SetCell(idx, 1, expCellVal)
 	}
 
-	t.SetBorder(true).SetTitle("Help").SetBackgroundColor(tcell.ColorDefault)
+	t.SetBorder(true).SetTitle("Help")
 
 	m := HelpModal{
 		table: t,

@@ -2,11 +2,16 @@ package widgets
 
 import (
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/airports"
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 type AirportInfo struct {
 	table *tview.Table
+}
+
+func baseCell(data string) *tview.TableCell {
+	return tview.NewTableCell(data).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignLeft)
 }
 
 // Constructs a new AirportInfo object

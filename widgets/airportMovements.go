@@ -76,7 +76,7 @@ func (t *AirportMovementTable) SetData(data []airports.FlightArrivalDepartureDat
 		}
 
 		t.SetCell(row+1, 0, tview.NewTableCell(returnCity.Code.Iata).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
-		t.SetCell(row+1, 1, tview.NewTableCell(flight.Flight.Identification.Callsign).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
+		t.SetCell(row+1, 1, tview.NewTableCell(flight.Flight.Identification.Number.Default).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
 		t.SetCell(row+1, 2, tview.NewTableCell(flight.Flight.Airline.Short).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
 
 		// convert the time to a string
