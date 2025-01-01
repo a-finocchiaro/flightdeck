@@ -1,4 +1,4 @@
-package internal
+package ui
 
 import (
 	"github.com/a-finocchiaro/flightdeck/internal/widgets"
@@ -22,7 +22,7 @@ type HelpHint struct {
 type HelpHints []HelpHint
 
 // Creates a new help modal
-func NewHelpModal(r *Router) *HelpModal {
+func NewHelpModal() *HelpModal {
 	t := tview.NewTable()
 
 	// setup a table with some help information
@@ -42,7 +42,6 @@ func NewHelpModal(r *Router) *HelpModal {
 	}
 
 	m.Modal = widgets.NewStaticModal(t)
-	r.AddPage(HelpModalPageName, m.Modal.Primitive(), true, false)
 
 	return &m
 }

@@ -1,4 +1,4 @@
-package internal
+package ui
 
 import (
 	"github.com/a-finocchiaro/flightdeck/internal/layout"
