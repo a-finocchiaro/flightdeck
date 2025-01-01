@@ -39,8 +39,8 @@ type AirportMovementPage struct {
 }
 
 var airportMovementGridOpts layout.GridOptions = layout.GridOptions{
-	RowCount:   1,
-	ColCount:   3,
+	RowSizes:   []int{0},
+	ColSizes:   []int{0, 0, 0},
 	HeaderSize: 10,
 }
 

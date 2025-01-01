@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/a-finocchiaro/flightdeck/internal/layout"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/client"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/common"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/flights"
@@ -15,13 +16,13 @@ import (
 )
 
 const (
-	// This was calculated manually by figuring out that the max points on a graph at
-	// full screen is 255 with a reported width of 15 from tview.
+	// This was calculated manually by figuring out that the max points shown on a graph
+	// in the terminal was 171 when tview reported a width of 15.
 	//
 	// When it's set into a smaller grid component, it's only ~68 and a reported width
-	// of 61. This value represents the average of (xWidth x reportedWidth) to figure
+	// of 61. This value represents the average of (xWidth * reportedWidth) / 2 to figure
 	// out a sensible graph proportion for each screen size.
-	pointToWidthProportion = 3986.5
+	pointToWidthProportion = 3356.5
 )
 
 type plotData [][]float64
@@ -31,14 +32,21 @@ func baseTreeNode(data string) *tview.TreeNode {
 }
 
 type FlightTree struct {
-	grid     *tview.Grid
+	grid     *layout.GridLayout
 	Tree     *tview.TreeView
 	gauge    *tvxwidgets.PercentageModeGauge
 	altGraph *tvxwidgets.Plot
 }
 
+var flightDetailGridOpts layout.GridOptions = layout.GridOptions{
+	RowSizes:   []int{0, 3, 0},
+	ColSizes:   []int{0},
+	HeaderSize: -1,
+}
+
 func NewFlightTree() *FlightTree {
-	g := tview.NewGrid().SetRows(0, 3, 0).SetColumns(0)
+	// g := tview.NewGrid().SetRows(0, 3, 0).SetColumns(0)
+	g := layout.NewGridLayout(flightDetailGridOpts)
 
 	fv := FlightTree{
 		grid:     g,
@@ -111,9 +119,9 @@ func (f *FlightTree) Update(flightId string) {
 }
 
 func (f *FlightTree) Primitive() tview.Primitive {
-	f.grid.AddItem(f.Tree, 0, 0, 1, 1, 0, 0, true).
-		AddItem(f.gauge, 1, 0, 1, 1, 0, 0, false).
-		AddItem(f.altGraph, 2, 0, 1, 1, 0, 0, false)
+	f.grid.AddPanel(f.Tree, 0, 0, true)
+	f.grid.AddPanel(f.gauge, 1, 0, false)
+	f.grid.AddPanel(f.altGraph, 2, 0, false)
 
 	return f.grid
 }

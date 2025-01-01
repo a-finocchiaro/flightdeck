@@ -42,13 +42,14 @@ func Init() {
 	// add the pages
 	r.Primitives.AirportMovements = ui.NewAirportMovementPage(r.App, r.Pages)
 	r.Primitives.HelpModal = ui.NewHelpModal()
+	r.Primitives.FlightDetailPage = ui.NewFlightDetailPage("388cb25e")
+	r.AddPage(r.Primitives.FlightDetailPage.Title, r.Primitives.FlightDetailPage.FlightData.Primitive(), true, true)
 	r.AddPage(r.Primitives.HelpModal.Title, r.Primitives.HelpModal.Modal.Primitive(), true, false)
-	// r.Primitives.FlightDetailPage = NewFlightDetailPage(r, "388bb127")
 	r.AddPage(
 		r.Primitives.AirportMovements.Modal.Title,
 		r.Primitives.AirportMovements.Modal.Primitive(),
 		true,
-		true,
+		false,
 	)
 	r.AddPage(
 		r.Primitives.AirportMovements.Title,
