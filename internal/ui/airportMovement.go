@@ -1,13 +1,15 @@
-package internal
+package ui
 
 import (
 	"os"
 
-	"github.com/a-finocchiaro/flightdeck/widgets"
+	"github.com/a-finocchiaro/flightdeck/internal/layout"
+	"github.com/a-finocchiaro/flightdeck/internal/widgets"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/client"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/common"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/webrequest"
 	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 // TODO: remove this
@@ -24,47 +26,49 @@ func DummyRequester(s string) ([]byte, error) {
 var AirportMovementPageTitle string = "AirportMovementsPage"
 
 type AirportMovementPage struct {
-	Grid            *GridLayout
+	Grid            *layout.GridLayout
 	airport         string
 	arrivalTable    *widgets.AirportMovementTable
 	departuresTable *widgets.AirportMovementTable
 	flightData      *widgets.FlightTree
 	airportInfo     *widgets.AirportInfo
-	router          *Router
-	title           string
+	app             *tview.Application
+	pages           *tview.Pages
+	Title           string
 	Modal           *AirportMovementModal
 }
 
-var airportMovementGridOpts GridOptions = GridOptions{
+var airportMovementGridOpts layout.GridOptions = layout.GridOptions{
 	RowCount:   1,
 	ColCount:   3,
 	HeaderSize: 10,
 }
 
 // Constructs the new airport movement page
-func NewAirportMovementPage(router *Router) *AirportMovementPage {
+func NewAirportMovementPage(app *tview.Application, pages *tview.Pages) *AirportMovementPage {
 	p := AirportMovementPage{
-		title:           AirportMovementPageTitle,
-		router:          router,
+		Title:           AirportMovementPageTitle,
+		app:             app,
+		pages:           pages,
 		arrivalTable:    widgets.NewAirportArrivalsTable(),
 		departuresTable: widgets.NewAirportDeparturesTable(),
-		flightData:      widgets.NewFlightTree(router.App),
+		flightData:      widgets.NewFlightTree(),
 		airportInfo:     widgets.NewAirportInfo(),
 		Modal:           NewAirportMovementModal(),
 	}
 
-	p.Grid = NewGridLayout(airportMovementGridOpts)
+	p.Grid = layout.NewGridLayout(airportMovementGridOpts)
 	p.Grid.AddHeader(p.airportInfo.Primitive(), false)
 
 	p.arrivalTable.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyTAB {
-			router.App.SetFocus(p.departuresTable)
+			app.SetFocus(p.departuresTable)
 		}
 	})
 
 	p.departuresTable.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyTAB {
-			router.App.SetFocus(p.arrivalTable)
+			app.SetFocus(p.arrivalTable)
 		}
 	})
 
@@ -77,9 +81,6 @@ func NewAirportMovementPage(router *Router) *AirportMovementPage {
 	// set the modal actions
 	p.setModalCallback()
 
-	router.AddPage(p.Modal.Title, p.Modal.Primitive(), true, true)
-	router.AddPage(p.title, p.Grid, true, false)
-
 	return &p
 }
 
@@ -91,7 +92,11 @@ func (p *AirportMovementPage) Update(code string) {
 	// update the code
 	p.airport = code
 
-	airportData, err := client.GetAirportDetails(requester, p.airport, []string{"details"})
+	airportData, err := client.GetAirportDetails(
+		requester,
+		p.airport,
+		[]string{"details"},
+	)
 
 	if err != nil {
 		panic(err)
@@ -105,13 +110,17 @@ func (p *AirportMovementPage) Update(code string) {
 	p.departuresTable.SetData(airportData.Schedule.Departures.Data)
 
 	p.arrivalTable.SetSelectedFunc(func(row int, col int) {
-		p.flightData.Update(airportData.Schedule.Arrivals.Data[row-1], p.arrivalTable.Table)
-		p.router.App.SetFocus(p.flightData.Primitive())
+		data := airportData.Schedule.Arrivals.Data[row-1].Flight.Identification.ID
+		p.flightData.Update(data)
+		p.setFlightDataEscape(p.arrivalTable.Table)
+		p.app.SetFocus(p.flightData.Primitive())
 	})
 
 	p.departuresTable.SetSelectedFunc(func(row int, col int) {
-		p.flightData.Update(airportData.Schedule.Departures.Data[row-1], p.departuresTable.Table)
-		p.router.App.SetFocus(p.flightData.Primitive())
+		data := airportData.Schedule.Departures.Data[row-1].Flight.Identification.ID
+		p.flightData.Update(data)
+		p.setFlightDataEscape(p.arrivalTable.Table)
+		p.app.SetFocus(p.flightData.Primitive())
 	})
 }
 
@@ -121,9 +130,18 @@ func (p *AirportMovementPage) setModalCallback() {
 		if buttonIndex == 1 {
 			airportCode := p.Modal.GetInputDataForField("Airport IATA:")
 			p.Update(airportCode)
-			p.router.Pages.ShowPage(p.title)
-			p.router.Pages.HidePage(p.Modal.Title)
+			p.pages.ShowPage(p.Title)
+			p.pages.HidePage(p.Modal.Title)
 		}
-		p.router.Pages.HidePage(p.Modal.Title)
+		p.pages.HidePage(p.Modal.Title)
+	})
+}
+
+// Sets the escape to navigate from the the flight data panel back to the tables
+func (p *AirportMovementPage) setFlightDataEscape(caller tview.Primitive) {
+	p.flightData.Tree.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEsc {
+			p.app.SetFocus(caller)
+		}
 	})
 }

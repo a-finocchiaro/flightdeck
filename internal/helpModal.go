@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/a-finocchiaro/flightdeck/widgets"
+	"github.com/a-finocchiaro/flightdeck/internal/widgets"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )

@@ -1,4 +1,4 @@
-package internal
+package layout
 
 import "github.com/rivo/tview"
 
@@ -30,7 +30,7 @@ func NewGridLayout(opts GridOptions) *GridLayout {
 }
 
 func (g *GridLayout) AddPanel(p tview.Primitive, row int, col int, focus bool) {
-	g.AddItem(p, row, col, 1, 1, 0, 100, focus)
+	g.AddItem(p, row, col, 1, 1, 0, 0, focus)
 }
 
 func (g *GridLayout) AddHeader(p tview.Primitive, focus bool) {

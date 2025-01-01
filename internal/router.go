@@ -3,6 +3,7 @@ package internal
 import (
 	"strings"
 
+	"github.com/a-finocchiaro/flightdeck/internal/ui"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -14,8 +15,9 @@ type Router struct {
 }
 
 type FlightDeckPrimitives struct {
-	AirportMovements *AirportMovementPage
+	AirportMovements *ui.AirportMovementPage
 	HelpModal        *HelpModal
+	FlightDetailPage *FlightDetailPage
 }
 
 const (
@@ -38,8 +40,21 @@ func Init() {
 	}
 
 	// add the pages
-	r.Primitives.AirportMovements = NewAirportMovementPage(r)
+	r.Primitives.AirportMovements = ui.NewAirportMovementPage(r.App, r.Pages)
 	r.Primitives.HelpModal = NewHelpModal(r)
+	// r.Primitives.FlightDetailPage = NewFlightDetailPage(r, "388bb127")
+	r.AddPage(
+		r.Primitives.AirportMovements.Modal.Title,
+		r.Primitives.AirportMovements.Modal.Primitive(),
+		true,
+		true,
+	)
+	r.AddPage(
+		r.Primitives.AirportMovements.Title,
+		r.Primitives.AirportMovements.Grid,
+		true,
+		false,
+	)
 
 	// bind the keys
 	r.bindKeys()
@@ -74,11 +89,9 @@ func (r *Router) bindKeys() {
 			}
 
 		case tcell.KeyRune:
-			key := tcell.Key(event.Rune())
-
-			// Set the help modal
-			if key == KeyHelp {
+			if event.Rune() == '?' {
 				r.Pages.ShowPage(r.Primitives.HelpModal.Title)
+				r.Pages.SendToFront(r.Primitives.HelpModal.Title)
 			}
 		}
 

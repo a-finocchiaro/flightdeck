@@ -1,6 +1,6 @@
-package internal
+package ui
 
-import "github.com/a-finocchiaro/flightdeck/widgets"
+import "github.com/a-finocchiaro/flightdeck/internal/widgets"
 
 var AirportMovementModalPageTitle string = "AirportMovementsModal"
 
