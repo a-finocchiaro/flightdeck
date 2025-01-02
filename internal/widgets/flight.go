@@ -1,7 +1,6 @@
 package widgets
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/a-finocchiaro/flightdeck/internal/layout"
@@ -27,13 +26,9 @@ const (
 
 type plotData [][]float64
 
-func baseTreeNode(data string) *tview.TreeNode {
-	return tview.NewTreeNode(data).SetColor(tcell.ColorWhite)
-}
-
-type FlightTree struct {
+type FlightWidget struct {
 	grid     *layout.GridLayout
-	Tree     *tview.TreeView
+	Tree     *FlightTree
 	gauge    *tvxwidgets.PercentageModeGauge
 	altGraph *tvxwidgets.Plot
 }
@@ -44,22 +39,21 @@ var flightDetailGridOpts layout.GridOptions = layout.GridOptions{
 	HeaderSize: -1,
 }
 
-func NewFlightTree() *FlightTree {
-	// g := tview.NewGrid().SetRows(0, 3, 0).SetColumns(0)
+func NewFlightWidget() *FlightWidget {
 	g := layout.NewGridLayout(flightDetailGridOpts)
 
-	fv := FlightTree{
+	fw := FlightWidget{
 		grid:     g,
-		Tree:     tview.NewTreeView(),
+		Tree:     NewFlightTree(),
 		gauge:    tvxwidgets.NewPercentageModeGauge(),
 		altGraph: tvxwidgets.NewPlot(),
 	}
 
-	return &fv
+	return &fw
 }
 
 // Updates the flight view with new data
-func (f *FlightTree) Update(flightId string) {
+func (f *FlightWidget) Update(flightId string) {
 	// clear any existing graph data off of the screen
 	f.clearGraphs()
 
@@ -71,54 +65,12 @@ func (f *FlightTree) Update(flightId string) {
 		panic(err)
 	}
 
-	// Setup the base tree
-	baseNode := baseTreeNode(flightData.Identification.Number.Default)
-	f.Tree.SetRoot(baseNode).SetCurrentNode(baseNode)
-	airlineNode := baseTreeNode("Airline")
-	originNode := baseTreeNode("Origin")
-	destNode := baseTreeNode("Destination")
-	aircraftNode := baseTreeNode("Aircraft")
-	statusNode := baseTreeNode("Status")
-
-	baseNode.AddChild(statusNode)
-	baseNode.AddChild(originNode)
-	baseNode.AddChild(destNode)
-	baseNode.AddChild(airlineNode)
-	baseNode.AddChild(aircraftNode)
-
-	// Set the Airport info for the origin or destination
-	originNode.AddChild(baseTreeNode(flightData.Airport.Origin.Name))
-	destNode.AddChild(baseTreeNode(flightData.Airport.Destination.Name))
-
-	// set the airline info
-	airlineNode.AddChild(baseTreeNode(flightData.Airline.Name))
-
-	// set the aircraft child node data
-	aircraftNode.AddChild(baseTreeNode(flightData.Aircraft.Model.Text))
-	aircraftNode.AddChild(baseTreeNode(flightData.Aircraft.Model.Code))
-	aircraftNode.AddChild(baseTreeNode(flightData.Aircraft.Registration))
-
-	// set the status indicator
-	var statusColor tcell.Color
-
-	switch flightData.Status.Icon {
-	case "green":
-		statusColor = tcell.ColorGreen
-	case "yellow":
-		statusColor = tcell.ColorYellow
-	case "red":
-		statusColor = tcell.ColorRed
-	default:
-		statusColor = tcell.ColorGray
-	}
-
-	statusNode.AddChild(baseTreeNode(fmt.Sprintf("%s %s", "⏺", flightData.Status.Text)).SetColor(statusColor))
-
+	f.Tree.BuildTreeForFlight(flightData)
 	f.drawFlightProgressBar(flightData)
 	f.drawAltitudeGraph(flightData)
 }
 
-func (f *FlightTree) Primitive() tview.Primitive {
+func (f *FlightWidget) Primitive() tview.Primitive {
 	f.grid.AddPanel(f.Tree, 0, 0, true)
 	f.grid.AddPanel(f.gauge, 1, 0, false)
 	f.grid.AddPanel(f.altGraph, 2, 0, false)
@@ -127,7 +79,7 @@ func (f *FlightTree) Primitive() tview.Primitive {
 }
 
 // Draws the altitude graph to the screen
-func (f *FlightTree) drawAltitudeGraph(flightData flights.Flight) {
+func (f *FlightWidget) drawAltitudeGraph(flightData flights.Flight) {
 	trail := flightData.Trail
 
 	// Do nothing for flights that have not departed yet or do not contain any
@@ -167,7 +119,7 @@ func (f *FlightTree) drawAltitudeGraph(flightData flights.Flight) {
 }
 
 // Draws the flight progress bar to the screen
-func (f *FlightTree) drawFlightProgressBar(flightData flights.Flight) {
+func (f *FlightWidget) drawFlightProgressBar(flightData flights.Flight) {
 	trail := flightData.Trail
 
 	// Do nothing for flights that have not departed yet or do not contain any
@@ -203,7 +155,7 @@ func (f *FlightTree) drawFlightProgressBar(flightData flights.Flight) {
 }
 
 // Automatically clears the data out of all graphs
-func (f *FlightTree) clearGraphs() {
+func (f *FlightWidget) clearGraphs() {
 	f.gauge.SetValue(0)
 	f.altGraph.SetData(plotData{})
 }

@@ -23,5 +23,8 @@ This is just something cool I wanted to build in my free time that interests me 
 
 ### Components
 
-- [ ] Flight Progress bar
-- [ ]
+- [x] Flight Progress bar
+
+### Cool Ideas
+
+- [ ] Add speed to graph w/ 2nd Y axis (requires forking tvxwidgets?)

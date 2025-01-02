@@ -2,6 +2,7 @@ package ui
 
 import (
 	"os"
+	"strings"
 
 	"github.com/a-finocchiaro/flightdeck/internal/layout"
 	"github.com/a-finocchiaro/flightdeck/internal/widgets"
@@ -30,7 +31,7 @@ type AirportMovementPage struct {
 	airport         string
 	arrivalTable    *widgets.AirportMovementTable
 	departuresTable *widgets.AirportMovementTable
-	flightData      *widgets.FlightTree
+	flightData      *widgets.FlightWidget
 	airportInfo     *widgets.AirportInfo
 	app             *tview.Application
 	pages           *tview.Pages
@@ -52,7 +53,7 @@ func NewAirportMovementPage(app *tview.Application, pages *tview.Pages) *Airport
 		pages:           pages,
 		arrivalTable:    widgets.NewAirportArrivalsTable(),
 		departuresTable: widgets.NewAirportDeparturesTable(),
-		flightData:      widgets.NewFlightTree(),
+		flightData:      widgets.NewFlightWidget(),
 		airportInfo:     widgets.NewAirportInfo(),
 		Modal:           NewAirportMovementModal(),
 	}
@@ -121,6 +122,21 @@ func (p *AirportMovementPage) Update(code string) {
 		p.flightData.Update(data)
 		p.setFlightDataEscape(p.arrivalTable.Table)
 		p.app.SetFocus(p.flightData.Primitive())
+	})
+
+	// Send user to the flight detail page if they select a flight
+	p.flightData.Tree.SetSelectedFunc(func(node *tview.TreeNode) {
+		ref := node.GetReference()
+
+		if ref != nil {
+			next := ref.(widgets.NextLocRef)
+
+			// send to the desired airport only if it's a different airport
+			if next.Airport != "" && strings.ToLower(next.Airport) != code {
+				p.app.SetFocus(p.arrivalTable.Table)
+				p.Update(ref.(widgets.NextLocRef).Airport)
+			}
+		}
 	})
 }
 

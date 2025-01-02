@@ -20,17 +20,8 @@ type FlightDeckPrimitives struct {
 	FlightDetailPage *ui.FlightDetailPage
 }
 
-const (
-	KeyHelp tcell.Key = 63
-)
-
-func initKeys() {
-	tcell.KeyNames[KeyHelp] = "?"
-}
-
 // Sets up a new router and starts the application
 func Init() {
-	initKeys()
 	pageMgr := FlightDeckPrimitives{}
 
 	r := &Router{
@@ -42,9 +33,9 @@ func Init() {
 	// add the pages
 	r.Primitives.AirportMovements = ui.NewAirportMovementPage(r.App, r.Pages)
 	r.Primitives.HelpModal = ui.NewHelpModal()
-	r.Primitives.FlightDetailPage = ui.NewFlightDetailPage("388cb25e")
-	r.AddPage(r.Primitives.FlightDetailPage.Title, r.Primitives.FlightDetailPage.FlightData.Primitive(), true, true)
-	r.AddPage(r.Primitives.HelpModal.Title, r.Primitives.HelpModal.Modal.Primitive(), true, false)
+	r.Primitives.FlightDetailPage = ui.NewFlightDetailPage()
+	r.AddPage(r.Primitives.FlightDetailPage.Title, r.Primitives.FlightDetailPage.FlightData.Primitive(), true, false)
+	r.AddPage(r.Primitives.HelpModal.Title, r.Primitives.HelpModal.Modal.Primitive(), true, true)
 	r.AddPage(
 		r.Primitives.AirportMovements.Modal.Title,
 		r.Primitives.AirportMovements.Modal.Primitive(),
