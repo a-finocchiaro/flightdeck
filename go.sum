@@ -1,5 +1,7 @@
-github.com/a-finocchiaro/go-flightradar24-sdk v0.0.0-20241223184140-2c76362f4a98 h1:gOFXeX+00T+Yl0wJSv3tN+0Aql5y4R2CPHMSqvLw4xs=
-github.com/a-finocchiaro/go-flightradar24-sdk v0.0.0-20241223184140-2c76362f4a98/go.mod h1:9M5wmB+AvIZwoAWM9emwFY0qiZfeDbobFmeVYrLvcuk=
+github.com/a-finocchiaro/go-flightradar24-sdk v0.0.0-20250102224129-18521ae74902 h1:ehRpeKjIgqgHMyZHWCZey64qmbsjBxfk71EEktjF4FM=
+github.com/a-finocchiaro/go-flightradar24-sdk v0.0.0-20250102224129-18521ae74902/go.mod h1:9M5wmB+AvIZwoAWM9emwFY0qiZfeDbobFmeVYrLvcuk=
+github.com/a-finocchiaro/go-flightradar24-sdk v0.0.0-20250102224527-edd8bc1b2a84 h1:Xl8e9sMaL8DSWm1fE2o7otIlJyYiIU9GHQXVZ15m7lc=
+github.com/a-finocchiaro/go-flightradar24-sdk v0.0.0-20250102224527-edd8bc1b2a84/go.mod h1:9M5wmB+AvIZwoAWM9emwFY0qiZfeDbobFmeVYrLvcuk=
 github.com/gdamore/encoding v1.0.0 h1:+7OoQ1Bc6eTm5niUzBa0Ctsh6JbMW6Ra+YNuAtDBdko=
 github.com/gdamore/encoding v1.0.0/go.mod h1:alR0ol34c49FCSBLjhosxzcPHQbf2trDkoo5dl+VrEg=
 github.com/gdamore/tcell/v2 v2.7.4 h1:sg6/UnTM9jGpZU+oFYAsDahfchWAFW8Xx2yFinNSAYU=

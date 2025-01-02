@@ -16,6 +16,7 @@ type FlightTree struct {
 	OriginNode   *tview.TreeNode
 	DestNode     *tview.TreeNode
 	AircraftNode *tview.TreeNode
+	SpeedAltNode *tview.TreeNode
 }
 
 type NextLocRef struct {
@@ -45,12 +46,14 @@ func (t *FlightTree) BuildTreeForFlight(flight flights.Flight) {
 	t.DestNode = baseTreeNode("Destination")
 	t.AircraftNode = baseTreeNode("Aircraft")
 	t.StatusNode = baseTreeNode("Status")
+	t.SpeedAltNode = baseTreeNode("Speed and Altitude")
 
 	t.RootNode.AddChild(t.StatusNode)
 	t.RootNode.AddChild(t.OriginNode)
 	t.RootNode.AddChild(t.DestNode)
 	t.RootNode.AddChild(t.AirlineNode)
 	t.RootNode.AddChild(t.AircraftNode)
+	t.RootNode.AddChild(t.SpeedAltNode)
 
 	// Set the Airport info for the origin or destination
 	origin := baseTreeNode(flight.Airport.Origin.Name)
@@ -83,4 +86,11 @@ func (t *FlightTree) BuildTreeForFlight(flight flights.Flight) {
 	}
 
 	t.StatusNode.AddChild(baseTreeNode(fmt.Sprintf("%s %s", "⏺", flight.Status.Text)).SetColor(statusColor))
+
+	// speed and altitude data
+	if len(flight.Trail) > 0 {
+		latestTrail := flight.Trail[0]
+		t.SpeedAltNode.AddChild(baseTreeNode(fmt.Sprintf("%dft", latestTrail.Alt)))
+		t.SpeedAltNode.AddChild(baseTreeNode(fmt.Sprintf("%dkts", latestTrail.Spd)))
+	}
 }

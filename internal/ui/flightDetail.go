@@ -23,6 +23,6 @@ func NewFlightDetailPage() *FlightDetailPage {
 
 // Sets the current flight and calls update on the flightdata to fetch an updated
 // copy.
-func (f *FlightDetailPage) SetFlight(flightId string) {
-	f.FlightData.Update(flightId)
-}
+// func (f *FlightDetailPage) SetFlight(flightId string) {
+// 	f.FlightData.Update(flightId)
+// }

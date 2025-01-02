@@ -111,16 +111,14 @@ func (p *AirportMovementPage) Update(code string) {
 	p.departuresTable.SetData(airportData.Schedule.Departures.Data)
 
 	p.arrivalTable.SetSelectedFunc(func(row int, col int) {
-		data := airportData.Schedule.Arrivals.Data[row-1].Flight.Identification.ID
-		p.flightData.Update(data)
+		p.flightData.Update(airportData.Schedule.Arrivals.Data[row-1].Flight)
 		p.setFlightDataEscape(p.arrivalTable.Table)
 		p.app.SetFocus(p.flightData.Primitive())
 	})
 
 	p.departuresTable.SetSelectedFunc(func(row int, col int) {
-		data := airportData.Schedule.Departures.Data[row-1].Flight.Identification.ID
-		p.flightData.Update(data)
-		p.setFlightDataEscape(p.arrivalTable.Table)
+		p.flightData.Update(airportData.Schedule.Departures.Data[row-1].Flight)
+		p.setFlightDataEscape(p.departuresTable.Table)
 		p.app.SetFocus(p.flightData.Primitive())
 	})
 
@@ -135,6 +133,7 @@ func (p *AirportMovementPage) Update(code string) {
 			if next.Airport != "" && strings.ToLower(next.Airport) != code {
 				p.app.SetFocus(p.arrivalTable.Table)
 				p.Update(ref.(widgets.NextLocRef).Airport)
+				return
 			}
 		}
 	})

@@ -3,7 +3,7 @@ module github.com/a-finocchiaro/flightdeck
 go 1.22.10
 
 require (
-	github.com/a-finocchiaro/go-flightradar24-sdk v0.0.0-20241223184140-2c76362f4a98
+	github.com/a-finocchiaro/go-flightradar24-sdk v0.0.0-20250102224527-edd8bc1b2a84
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/navidys/tvxwidgets v0.9.0
 	github.com/rivo/tview v0.0.0-20241103174730-c76f7879f592

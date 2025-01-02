@@ -53,21 +53,28 @@ func NewFlightWidget() *FlightWidget {
 }
 
 // Updates the flight view with new data
-func (f *FlightWidget) Update(flightId string) {
+func (f *FlightWidget) Update(flightData flights.Flight) {
 	// clear any existing graph data off of the screen
 	f.clearGraphs()
 
-	// get flight progress information
-	var requester common.Requester = webrequest.SendRequest
-	flightData, err := client.GetFlightDetails(requester, flightId)
+	flightId := flightData.Identification.ID
 
-	if err != nil {
-		panic(err)
+	// get flight progress information and re-assign flightData if detailed
+	// flight information exists.
+	if flightId != "" {
+		var requester common.Requester = webrequest.SendRequest
+		var err error
+		flightData, err = client.GetFlightDetails(requester, flightId)
+
+		if err != nil {
+			panic(err)
+		}
+
+		f.drawFlightProgressBar(flightData)
+		f.drawAltitudeGraph(flightData)
 	}
 
 	f.Tree.BuildTreeForFlight(flightData)
-	f.drawFlightProgressBar(flightData)
-	f.drawAltitudeGraph(flightData)
 }
 
 func (f *FlightWidget) Primitive() tview.Primitive {

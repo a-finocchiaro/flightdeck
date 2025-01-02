@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/airports"
+	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/flights"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -66,7 +67,7 @@ func New(title string) (*AirportMovementTable, error) {
 // Sets the movement (arrival or departure) data into the table
 func (t *AirportMovementTable) SetData(data []airports.FlightArrivalDepartureData) {
 	for row, flight := range data {
-		var returnCity airports.FlightAiportData
+		var returnCity flights.FlightAirport
 
 		// set the return city value
 		if t.movementState == arrivals {
