@@ -3,6 +3,7 @@ package widgets
 import (
 	"fmt"
 
+	"github.com/a-finocchiaro/flightdeck/internal/utils"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/flights"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -72,19 +73,7 @@ func (t *FlightTree) BuildTreeForFlight(flight flights.Flight) {
 	t.AircraftNode.AddChild(baseTreeNode(flight.Aircraft.Model.Code))
 	t.AircraftNode.AddChild(baseTreeNode(flight.Aircraft.Registration))
 
-	var statusColor tcell.Color
-
-	switch flight.Status.Icon {
-	case "green":
-		statusColor = tcell.ColorGreen
-	case "yellow":
-		statusColor = tcell.ColorYellow
-	case "red":
-		statusColor = tcell.ColorRed
-	default:
-		statusColor = tcell.ColorGray
-	}
-
+	statusColor := utils.FlightStatusColor(flight.Status.Icon)
 	t.StatusNode.AddChild(baseTreeNode(fmt.Sprintf("%s %s", "⏺", flight.Status.Text)).SetColor(statusColor))
 
 	// speed and altitude data

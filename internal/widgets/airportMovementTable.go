@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-finocchiaro/flightdeck/internal/utils"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/airports"
 	"github.com/a-finocchiaro/go-flightradar24-sdk/pkg/models/flights"
 	"github.com/gdamore/tcell/v2"
@@ -76,14 +77,15 @@ func (t *AirportMovementTable) SetData(data []airports.FlightArrivalDepartureDat
 			returnCity = flight.Flight.Airport.Destination
 		}
 
-		t.SetCell(row+1, 0, tview.NewTableCell(returnCity.Code.Iata).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
-		t.SetCell(row+1, 1, tview.NewTableCell(flight.Flight.Identification.Number.Default).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
-		t.SetCell(row+1, 2, tview.NewTableCell(flight.Flight.Airline.Short).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter))
+		statusColor := utils.FlightStatusColor(flight.Flight.Status.Icon)
+		t.SetCell(row+1, 0, tview.NewTableCell(returnCity.Code.Iata).SetTextColor(statusColor).SetAlign(tview.AlignCenter))
+		t.SetCell(row+1, 1, tview.NewTableCell(flight.Flight.Identification.Number.Default).SetTextColor(statusColor).SetAlign(tview.AlignCenter))
+		t.SetCell(row+1, 2, tview.NewTableCell(flight.Flight.Airline.Short).SetTextColor(statusColor).SetAlign(tview.AlignCenter))
 
 		// convert the time to a string
 		strTime := time.Unix(int64(flight.Flight.Time.Scheduled.Arrival), 0).String()
 
-		t.SetCell(row+1, 3, tview.NewTableCell(strTime).SetTextColor(tcell.ColorWhite).SetAlign(tview.AlignCenter).SetExpansion(1))
+		t.SetCell(row+1, 3, tview.NewTableCell(strTime).SetTextColor(statusColor).SetAlign(tview.AlignCenter).SetExpansion(1))
 	}
 }
 

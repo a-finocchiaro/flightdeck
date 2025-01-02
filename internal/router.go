@@ -17,7 +17,6 @@ type Router struct {
 type FlightDeckPrimitives struct {
 	AirportMovements *ui.AirportMovementPage
 	HelpModal        *ui.HelpModal
-	FlightDetailPage *ui.FlightDetailPage
 }
 
 // Sets up a new router and starts the application
@@ -33,8 +32,6 @@ func Init() {
 	// add the pages
 	r.Primitives.AirportMovements = ui.NewAirportMovementPage(r.App, r.Pages)
 	r.Primitives.HelpModal = ui.NewHelpModal()
-	r.Primitives.FlightDetailPage = ui.NewFlightDetailPage()
-	r.AddPage(r.Primitives.FlightDetailPage.Title, r.Primitives.FlightDetailPage.FlightData.Primitive(), true, false)
 	r.AddPage(r.Primitives.HelpModal.Title, r.Primitives.HelpModal.Modal.Primitive(), true, true)
 	r.AddPage(
 		r.Primitives.AirportMovements.Modal.Title,
