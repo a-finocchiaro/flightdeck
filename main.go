@@ -1,7 +1,7 @@
 package main
 
-import "github.com/a-finocchiaro/flightdeck/internal"
+import "github.com/a-finocchiaro/flightdeck/cmd"
 
 func main() {
-	internal.Init()
+	cmd.Execute()
 }
