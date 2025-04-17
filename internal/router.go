@@ -3,6 +3,7 @@ package internal
 import (
 	"strings"
 
+	"github.com/a-finocchiaro/flightdeck/config"
 	"github.com/a-finocchiaro/flightdeck/internal/ui"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -20,7 +21,7 @@ type FlightDeckPrimitives struct {
 }
 
 // Sets up a new router and starts the application
-func Init() {
+func Init(cfg *config.FlightDeckConfig) {
 	pageMgr := FlightDeckPrimitives{}
 
 	r := &Router{
@@ -32,6 +33,7 @@ func Init() {
 	// add the pages
 	r.Primitives.AirportMovements = ui.NewAirportMovementPage(r.App, r.Pages)
 	r.Primitives.HelpModal = ui.NewHelpModal()
+
 	r.AddPage(r.Primitives.HelpModal.Title, r.Primitives.HelpModal.Modal.Primitive(), true, true)
 	r.AddPage(
 		r.Primitives.AirportMovements.Modal.Title,
@@ -45,6 +47,16 @@ func Init() {
 		true,
 		false,
 	)
+
+	// if an airport is defined from config, open directly to that airport
+	// TODO: workflow here is a little jank, maybe move/refactor this?
+	// Tip: it's jank because we set the visibility of the windows above, then re-hide
+	// them here.
+	if cfg.Airport != "" {
+		r.Pages.HidePage(r.Primitives.HelpModal.Title)
+		r.Primitives.AirportMovements.Update(cfg.Airport)
+		r.Pages.ShowPage(r.Primitives.AirportMovements.Title)
+	}
 
 	// bind the keys
 	r.bindKeys()
