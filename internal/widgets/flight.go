@@ -27,10 +27,11 @@ const (
 type plotData [][]float64
 
 type FlightWidget struct {
-	grid     *layout.GridLayout
-	Tree     *FlightTree
-	gauge    *tvxwidgets.PercentageModeGauge
-	altGraph *tvxwidgets.Plot
+	grid       *layout.GridLayout
+	Tree       *FlightTree
+	gauge      *tvxwidgets.PercentageModeGauge
+	altGraph   *tvxwidgets.Plot
+	FlightData flights.Flight
 }
 
 var flightDetailGridOpts layout.GridOptions = layout.GridOptions{
@@ -52,29 +53,32 @@ func NewFlightWidget() *FlightWidget {
 	return &fw
 }
 
+func (f *FlightWidget) Start(flightData flights.Flight) {
+	f.FlightData = flightData
+	f.Update()
+}
+
 // Updates the flight view with new data
-func (f *FlightWidget) Update(flightData flights.Flight) {
+func (f *FlightWidget) Update() {
 	// clear any existing graph data off of the screen
 	f.clearGraphs()
 
-	flightId := flightData.Identification.ID
-
 	// get flight progress information and re-assign flightData if detailed
 	// flight information exists.
-	if flightId != "" {
+	if f.FlightData.Identification.ID != "" {
 		var requester common.Requester = webrequest.SendRequest
 		var err error
-		flightData, err = client.GetFlightDetails(requester, flightId)
+		f.FlightData, err = client.GetFlightDetails(requester, f.FlightData.Identification.ID)
 
 		if err != nil {
 			panic(err)
 		}
 
-		f.drawFlightProgressBar(flightData)
-		f.drawAltitudeGraph(flightData)
+		f.drawFlightProgressBar(f.FlightData)
+		f.drawAltitudeGraph(f.FlightData)
 	}
 
-	f.Tree.BuildTreeForFlight(flightData)
+	f.Tree.BuildTreeForFlight(f.FlightData)
 }
 
 func (f *FlightWidget) Primitive() tview.Primitive {

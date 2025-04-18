@@ -24,6 +24,8 @@ This is just something cool I wanted to build in my free time that interests me 
 ### Components
 
 - [x] Flight Progress bar
+- [ ] Configuration file
+- [ ] Persist state with [xdg](https://github.com/adrg/xdg) package (k9s does this)
 
 ### Cool Ideas
 

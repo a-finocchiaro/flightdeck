@@ -2,6 +2,7 @@ package internal
 
 import (
 	"strings"
+	"time"
 
 	"github.com/a-finocchiaro/flightdeck/config"
 	"github.com/a-finocchiaro/flightdeck/internal/ui"
@@ -54,12 +55,22 @@ func Init(cfg *config.FlightDeckConfig) {
 	// them here.
 	if cfg.Airport != "" {
 		r.Pages.HidePage(r.Primitives.HelpModal.Title)
-		r.Primitives.AirportMovements.Update(cfg.Airport)
+		r.Primitives.AirportMovements.Start(cfg.Airport)
 		r.Pages.ShowPage(r.Primitives.AirportMovements.Title)
 	}
 
 	// bind the keys
 	r.bindKeys()
+
+	// Add the automatic refresh loop
+	// TODO: make this configurable, and maybe add ability to disable?
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			r.Primitives.AirportMovements.Update()
+			r.App.Draw()
+		}
+	}()
 
 	// start the application
 	if err := r.App.SetRoot(r.Pages, true).SetFocus(r.Pages).Run(); err != nil {

@@ -85,13 +85,16 @@ func NewAirportMovementPage(app *tview.Application, pages *tview.Pages) *Airport
 	return &p
 }
 
+// Initiates a Go routine to update the page on some interval automatically
+func (p *AirportMovementPage) Start(code string) {
+	p.airport = code
+	p.Update()
+}
+
 // fetch updated data and set it in the tables
-func (p *AirportMovementPage) Update(code string) {
+func (p *AirportMovementPage) Update() {
 	// var requester common.Requester = DummyRequester
 	var requester common.Requester = webrequest.SendRequest
-
-	// update the code
-	p.airport = code
 
 	airportData, err := client.GetAirportDetails(
 		requester,
@@ -106,18 +109,23 @@ func (p *AirportMovementPage) Update(code string) {
 	// update the airport info table
 	p.airportInfo.Update(airportData)
 
+	// update the flight info if a flight is selected
+	if p.flightData.FlightData.Identification.Callsign != "" {
+		p.flightData.Update()
+	}
+
 	// update the arrival and departure tables
 	p.arrivalTable.SetData(airportData.Schedule.Arrivals.Data)
 	p.departuresTable.SetData(airportData.Schedule.Departures.Data)
 
 	p.arrivalTable.SetSelectedFunc(func(row int, col int) {
-		p.flightData.Update(airportData.Schedule.Arrivals.Data[row-1].Flight)
+		p.flightData.Start(airportData.Schedule.Arrivals.Data[row-1].Flight)
 		p.setFlightDataEscape(p.arrivalTable.Table)
 		p.app.SetFocus(p.flightData.Primitive())
 	})
 
 	p.departuresTable.SetSelectedFunc(func(row int, col int) {
-		p.flightData.Update(airportData.Schedule.Departures.Data[row-1].Flight)
+		p.flightData.Start(airportData.Schedule.Departures.Data[row-1].Flight)
 		p.setFlightDataEscape(p.departuresTable.Table)
 		p.app.SetFocus(p.flightData.Primitive())
 	})
@@ -130,9 +138,9 @@ func (p *AirportMovementPage) Update(code string) {
 			next := ref.(widgets.NextLocRef)
 
 			// send to the desired airport only if it's a different airport
-			if next.Airport != "" && strings.ToLower(next.Airport) != code {
+			if next.Airport != "" && strings.ToLower(next.Airport) != p.airport {
 				p.app.SetFocus(p.arrivalTable.Table)
-				p.Update(ref.(widgets.NextLocRef).Airport)
+				p.Update()
 				return
 			}
 		}
@@ -144,7 +152,8 @@ func (p *AirportMovementPage) setModalCallback() {
 	p.Modal.SetActionFunc(func(buttonIndex int, buttonLabel string) {
 		if buttonIndex == 1 {
 			airportCode := p.Modal.GetInputDataForField("Airport IATA:")
-			p.Update(airportCode)
+			p.airport = airportCode
+			p.Update()
 			p.pages.ShowPage(p.Title)
 			p.pages.HidePage(p.Modal.Title)
 		}

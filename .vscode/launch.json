@@ -10,7 +10,11 @@
             "request": "launch",
             "mode": "auto",
             "program": "main.go",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": [
+                "-a",
+                "DFW"
+            ]
         }
     ]
 }
